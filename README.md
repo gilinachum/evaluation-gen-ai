@@ -3,6 +3,11 @@ Examples for evaluating generative AI use cases on Amazon Bedrock and Amazon Sag
 
 ## Features
 
+### 0. [Understanding metric types: Textual vs Semantic](./metrics_examples.ipynb)
+- Examples for how ROUGE is computed over text
+- Examples for how BERT score is computed over text
+- Consider which use cases fits each
+
 ### 1. [Evaluating Amazon Bedrock Knowledge Base using RAGAS](./knowledge_base_basic_ragas_evaluation.ipynb)
 - Implements RAGAS framework for baseline testing of amazon Bedrock Knowledge bases
 - Measures retrieval accuracy and relevance
