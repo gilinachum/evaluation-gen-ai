@@ -18,7 +18,7 @@ Examples for evaluating generative AI use cases on Amazon Bedrock and Amazon Sag
 -- number of retreived answers
 -- Choice of generating model
 
-### 3. Model Safety Assessment
+### 3. [Model Safety Assessment](https://github.com/gilinachum/ragas-evaluation-and-bedrock-guardrails/blob/main/evaluate_prod_readiness.ipynb)
 - Integration with Bedrock Guardrails
 - RAGAS safety metrics implementation
 - Measure guardrail accuracy by analyzing tradeoffs between over-filtering (false positives) and under-filtering (false negatives).
