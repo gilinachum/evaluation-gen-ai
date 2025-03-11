@@ -1,0 +1,33 @@
+You are an expert at create datasets for RAG evaluation.
+Based on the attached document, create a set of 10 non trivial questions and answers paris, that will be used for Bedrock RAG evaluation.
+The questions and answers should be in the same language as the original document.
+Your output will be in a valid jsonl format so make sure to escape json special characters like quotes.
+
+Here's an paste of the format needed:
+#
+A Retrieve and generate evaluation jobs require a prompt dataset using JSON lines format. You can have up to 1000 prompts in your dataset
+
+Key value pairs used in prompt dataset for Retrieve and generate evaluation job
+referenceResponses – This parent key is used to specify the ground truth response you expect the RetrieveAndGenerate would return. Specify the ground truth in the text key. referenceResponses is required if you choose the Context coverage metric in your evaluation job.
+
+prompt – This parent key is used to specify the prompt (user query) that you want model to respond to while the evaluation job is running.
+
+
+{
+    "conversationTurns": [{
+        "referenceResponses": [{
+            "content": [{
+                "text": "This is a reference context"
+            }]
+        }],
+
+        ## your prompt to the model
+        "prompt": {
+            "content": [{
+                "text": "This is a prompt"
+            }]
+        }
+    }]
+}
+
+The following prompt is expanded for clarity. In your actual prompt dataset each line must be a valid JSON object.
