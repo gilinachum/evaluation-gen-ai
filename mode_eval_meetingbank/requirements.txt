@@ -1,0 +1,10 @@
+datasets>=2.0.0
+transformers>=4.0.0
+pandas
+numpy
+boto3>=1.28.0
+matplotlib
+jupyter
+ipykernel
+tqdm
+awscli>=1.29.0
