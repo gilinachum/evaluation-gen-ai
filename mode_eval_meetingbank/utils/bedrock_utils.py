@@ -147,10 +147,10 @@ def create_evaluation_job(
                             }
                         },
                         "metricNames": [
-                            "Builtin.Relevance",
+                            #"Builtin.Relevance",
                             "Builtin.Correctness",
                             "Builtin.Completeness",
-                            "Builtin.Coherence",
+                            #"Builtin.Coherence",
                         ]
                     }
                 ],
