@@ -31,12 +31,13 @@ def get_test_samples(dataset, num_samples=2):
     # Return the dataset slice directly, not individual samples
     return dataset['test'].select(range(num_samples))
 
-def prepare_for_bedrock_evaluation(samples):
+def prepare_for_bedrock_evaluation(samples, include_model_responses=False):
     """
     Prepare samples for Bedrock evaluation.
     
     Args:
         samples: List of samples from the dataset
+        include_model_responses: Whether to include empty modelResponses field (default: False)
         
     Returns:
         str: Path to the created jsonl file
@@ -60,6 +61,10 @@ def prepare_for_bedrock_evaluation(samples):
             "category": "meeting_summarization"
         }
         
+        # Add empty modelResponses field if requested
+        if include_model_responses:
+            record["modelResponses"] = []
+        
         evaluation_data.append(record)
     
     # Save as JSONL file
@@ -69,3 +74,16 @@ def prepare_for_bedrock_evaluation(samples):
             f.write(json.dumps(record) + '\n')
     
     return output_path
+
+def load_evaluation_dataset(dataset_path):
+    """
+    Load an evaluation dataset from a JSONL file.
+    
+    Args:
+        dataset_path: Path to the dataset JSONL file
+        
+    Returns:
+        list: List of evaluation records
+    """
+    with open(dataset_path, 'r') as f:
+        return [json.loads(line) for line in f]

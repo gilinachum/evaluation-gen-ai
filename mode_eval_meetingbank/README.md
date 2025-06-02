@@ -1,55 +1,70 @@
-# MeetingBank Model Evaluation
+# MeetingBank Evaluation
 
-This project demonstrates how to evaluate the accuracy of different Amazon Bedrock models (Nova.lite and Nova.pro) on the MeetingBank dataset for meeting summarization tasks.
+This project demonstrates how to evaluate various models (both Amazon Bedrock and external models) on the MeetingBank dataset for meeting summarization tasks.
 
-## Dataset
+## Overview
 
-We use the [MeetingBank dataset](https://huggingface.co/datasets/huuuyeah/meetingbank) which provides meeting transcripts and matching human-created summaries. This makes it ideal for evaluating summarization capabilities of large language models.
+The project includes:
 
-## Project Structure
+1. Tools to download and prepare the MeetingBank dataset
+2. Utilities for invoking models using Amazon Bedrock's Converse API
+3. Support for pre-generating model responses for evaluation
+4. Integration with Amazon Bedrock's evaluation capabilities
 
-- `download_dataset.py` - Simple script to download the MeetingBank dataset
-- `bedrock_evaluation.ipynb` - Main notebook for running model evaluations
-- `requirements.txt` - Dependencies for the project
-- `utils/` - Utility modules for dataset handling and Bedrock evaluation
+## Setup
 
-## Getting Started
-
-1. Install the required dependencies:
-   ```bash
+1. Install dependencies:
+   ```
    pip install -r requirements.txt
    ```
 
-2. Download the MeetingBank dataset:
-   ```bash
+2. Configure AWS credentials with appropriate permissions for Amazon Bedrock and S3.
+
+## Usage
+
+### Standard Bedrock Evaluation
+
+Run the `bedrock_evaluation.ipynb` notebook to:
+- Load the MeetingBank dataset
+- Prepare the dataset for Bedrock evaluation
+- Create and run a Bedrock evaluation job
+- Analyze and visualize the evaluation results
+
+### Evaluation with Pre-generated Responses
+
+For evaluating non-Bedrock models (like Gemini Flash), use the following workflow:
+
+1. Prepare the dataset:
+   ```
    python download_dataset.py
    ```
 
-3. Open and run the evaluation notebook:
-   ```bash
-   jupyter notebook bedrock_evaluation.ipynb
+2. Generate model responses using the Converse API:
+   ```
+   python pregenerate_responses.py --dataset ./data/bedrock_evaluation_dataset.jsonl --models "claude-3-haiku:us.anthropic.claude-3-haiku-20240307-v1:0" "nova-lite:us.amazon.nova-lite-v1:0"
    ```
 
-4. Follow the steps in the notebook to:
-   - Load the dataset
-   - Prepare it for Bedrock evaluation
-   - Configure and run evaluation jobs
-   - Analyze and visualize the results
+   This will create separate files for each model, as Bedrock evaluation jobs support only one model response per prompt.
 
-## AWS Configuration
+3. For external models, implement the API call in `external_model_utils.py` and format the responses for Bedrock evaluation.
 
-Before running the evaluation, you need to:
+4. Run the `bedrock_evaluation_pregenerated.ipynb` notebook to:
+   - Upload the datasets with pre-generated responses to S3
+   - Create and run separate Bedrock evaluation jobs for each model
+   - Analyze and visualize the evaluation results
 
-1. Configure AWS credentials with access to Amazon Bedrock and S3
-2. Create an IAM role with permissions for Bedrock evaluation jobs
-3. Update the `BEDROCK_ROLE_ARN` in the notebook with your role ARN
+## Project Structure
 
-## Models Evaluated
+- `data/`: Contains the MeetingBank dataset and prepared evaluation datasets
+- `results/`: Contains evaluation results
+- `utils/`: Utility functions for dataset preparation, model invocation, and evaluation
+  - `bedrock_utils.py`: Utilities for Amazon Bedrock evaluation
+  - `dataset_utils.py`: Utilities for loading and preprocessing the MeetingBank dataset
+  - `external_model_utils.py`: Utilities for working with external (non-Bedrock) models
+- `pregenerate_responses.py`: Script to pre-generate model responses using the Converse API
+- `bedrock_evaluation.ipynb`: Notebook for standard Bedrock evaluation
+- `bedrock_evaluation_pregenerated.ipynb`: Notebook for evaluation with pre-generated responses
 
-TBD
+## License
 
-The evaluation uses Bedrock's built-in evaluators to assess:
-- Relevance
-- Accuracy
-- Coherence
-- Conciseness
+See the LICENSE file for details.

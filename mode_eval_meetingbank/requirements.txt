@@ -8,3 +8,4 @@ jupyter
 ipykernel
 tqdm
 awscli>=1.29.0
+google-genai

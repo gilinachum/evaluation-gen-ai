@@ -1,3 +1,3 @@
 """
-Utility modules for MeetingBank dataset evaluation.
+Utility modules for the MeetingBank evaluation project.
 """
