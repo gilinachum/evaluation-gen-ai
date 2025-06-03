@@ -1,7 +1,0 @@
-boto3>=1.28.0
-datasets>=2.14.0
-matplotlib>=3.7.0
-pandas>=2.0.0
-jupyter>=1.0.0
-ipykernel>=6.0.0
-google-generativeai>=0.3.0
