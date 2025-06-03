@@ -1,11 +1,7 @@
-datasets>=2.0.0
-transformers>=4.0.0
-pandas
-numpy
 boto3>=1.28.0
-matplotlib
-jupyter
-ipykernel
-tqdm
-awscli>=1.29.0
-google-genai
+datasets>=2.14.0
+matplotlib>=3.7.0
+pandas>=2.0.0
+jupyter>=1.0.0
+ipykernel>=6.0.0
+google-generativeai>=0.3.0

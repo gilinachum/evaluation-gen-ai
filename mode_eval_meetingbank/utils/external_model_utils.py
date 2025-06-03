@@ -113,54 +113,168 @@ def merge_model_responses(
     logger.info(f"Merged dataset saved to {output_path}")
     return output_path
 
-# Example function for invoking Gemini Flash (placeholder)
-# You would need to implement this based on the actual Gemini API
-def invoke_gemini_flash(
+def invoke_gemini_model(
     prompts: List[str],
-    api_key: str,
+    model_id: str = "gemini-2.0-flash",
+    system_prompt: Optional[str] = None,
     temperature: float = 0.0,
-    max_tokens: int = 2048
+    max_tokens: int = 2048,
+    top_p: float = 0.7,
+    project_id: Optional[str] = None,
+    location: str = "global"
 ) -> List[Dict[str, Any]]:
     """
-    Invoke Gemini Flash model with a list of prompts.
+    Invoke Gemini model with a list of prompts using Google's Generative AI SDK.
     
     Args:
         prompts: List of prompts to send to the model
-        api_key: Gemini API key
+        model_id: Gemini model ID (default: "gemini-2.0-flash")
+        system_prompt: Optional system prompt to use (default: None)
         temperature: Temperature parameter (default: 0.0)
         max_tokens: Maximum tokens to generate (default: 2048)
+        top_p: Top-p parameter (default: 0.7)
+        project_id: Google Cloud project ID (default: None)
+        location: Google Cloud location (default: "global")
         
     Returns:
         List[Dict[str, Any]]: List of response dictionaries
     """
+    try:
+        from google import genai
+        from google.genai.types import GenerateContentConfig
+    except ImportError:
+        logger.error("Google Generative AI library not installed. Install with: pip install google-generativeai")
+        raise
+    
     responses = []
     
-    # This is a placeholder implementation
-    # You would need to replace this with actual Gemini API calls
-    for prompt in prompts:
-        logger.info(f"Invoking Gemini Flash for prompt: {prompt[:50]}...")
+    try:
+        # Initialize the Gemini client
+        if project_id:
+            client = genai.Client(vertexai=True, project=project_id, location=location)
+        else:
+            # Use API key if available in environment
+            client = genai.Client()
         
-        # Example API call (replace with actual implementation)
-        # response = requests.post(
-        #     "https://api.gemini.com/v1/models/gemini-flash:generateContent",
-        #     headers={"Authorization": f"Bearer {api_key}"},
-        #     json={
-        #         "contents": [{"parts": [{"text": prompt}]}],
-        #         "generationConfig": {
-        #             "temperature": temperature,
-        #             "maxOutputTokens": max_tokens
-        #         }
-        #     }
-        # )
-        # response_json = response.json()
-        # response_text = response_json["candidates"][0]["content"]["parts"][0]["text"]
+        logger.info(f"Initialized Gemini client for model {model_id}")
         
-        # Placeholder response
-        response_text = f"This is a placeholder response for Gemini Flash. Implement the actual API call."
-        
-        responses.append({
-            "response": response_text,
-            "modelIdentifier": "gemini-flash"
-        })
+        # Process each prompt
+        for i, prompt in enumerate(prompts):
+            logger.info(f"Processing prompt {i+1}/{len(prompts)} for model {model_id}")
+            
+            try:
+                # Create configuration
+                config = GenerateContentConfig(
+                    temperature=temperature,
+                    top_p=top_p,
+                    candidate_count=1,
+                    max_output_tokens=max_tokens,
+                )
+                
+                # Add system instruction if provided
+                if system_prompt:
+                    config.system_instruction = system_prompt
+                
+                # Generate content
+                response = client.models.generate_content(
+                    model=model_id,
+                    contents=prompt,
+                    config=config
+                )
+                
+                # Extract response text
+                response_text = response.text
+                
+                sanitized_model_name = model_id.replace('.', '-').replace(':', '-')
+                responses.append({
+                    "response": response_text,
+                    "modelIdentifier": sanitized_model_name
+                })
+                
+                logger.info(f"Successfully generated response for prompt {i+1}")
+                
+            except Exception as e:
+                logger.error(f"Error generating response for prompt {i+1}: {e}")
+                # Add an error message as the response
+                responses.append({
+                    "response": f"Error generating response: {str(e)}",
+                    "modelIdentifier": sanitized_model_name
+                })
+    
+    except Exception as e:
+        logger.error(f"Error initializing Gemini client: {e}")
+        # Return error responses for all prompts
+        responses = [{"response": f"Error initializing Gemini client: {str(e)}", "modelIdentifier": model_id} for _ in prompts]
     
     return responses
+
+def generate_gemini_responses(
+    dataset_path: str,
+    model_id: str = "gemini-2.0-flash",
+    output_path: Optional[str] = None,
+    system_prompt: Optional[str] = None,
+    project_id: Optional[str] = None,
+    location: str = "global",
+    temperature: float = 0.0,
+    max_tokens: int = 2048,
+    top_p: float = 0.7
+) -> str:
+    """
+    Generate responses for all prompts in the dataset using Gemini model.
+    
+    Args:
+        dataset_path: Path to the dataset JSONL file
+        model_id: Gemini model ID (default: "gemini-2.0-flash")
+        output_path: Path to save the output JSONL file (default: None)
+        system_prompt: Optional system prompt to use (default: None)
+        project_id: Google Cloud project ID (default: None)
+        location: Google Cloud location (default: "global")
+        temperature: Temperature parameter (default: 0.0)
+        max_tokens: Maximum tokens to generate (default: 2048)
+        top_p: Top-p parameter (default: 0.7)
+        
+    Returns:
+        str: Path to the output file
+    """
+    # Load the dataset
+    with open(dataset_path, 'r') as f:
+        dataset = [json.loads(line) for line in f]
+    
+    # Extract prompts
+    prompts = [record['prompt'] for record in dataset]
+    
+    # Generate responses
+    logger.info(f"Generating responses for {len(prompts)} prompts using Gemini model {model_id}")
+    responses = invoke_gemini_model(
+        prompts=prompts,
+        model_id=model_id,
+        system_prompt=system_prompt,
+        temperature=temperature,
+        max_tokens=max_tokens,
+        top_p=top_p,
+        project_id=project_id,
+        location=location
+    )
+    
+    # Create a copy of the dataset with responses
+    model_dataset = []
+    for i, record in enumerate(dataset):
+        model_record = record.copy()
+        if i < len(responses):
+            model_record['modelResponses'] = [responses[i]]
+        else:
+            model_record['modelResponses'] = []
+        model_dataset.append(model_record)
+    
+    # Generate output path if not provided
+    if not output_path:
+        model_name = model_id.replace('.', '-').replace(':', '-')
+        output_path = dataset_path.replace('.jsonl', f'_{model_name}.jsonl')
+    
+    # Save the dataset with responses
+    with open(output_path, 'w') as f:
+        for record in model_dataset:
+            f.write(json.dumps(record) + '\n')
+    
+    logger.info(f"Dataset with {model_id} responses saved to {output_path}")
+    return output_path

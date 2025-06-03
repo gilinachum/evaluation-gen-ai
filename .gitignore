@@ -166,3 +166,4 @@ mode_eval_meetingbank/data/bedrock_evaluation_dataset.jsonl
 mode_eval_meetingbank/bedrock_evaluation_dataset.jsonl
 mode_eval_meetingbank/results/**
 mode_eval_meetingbank/data/**
+model_eval_meetingbank.zip
